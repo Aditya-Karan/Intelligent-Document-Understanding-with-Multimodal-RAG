@@ -1,7 +1,6 @@
-# Use a lightweight Python base image
 FROM python:3.11-slim
 
-# Set environment variables
+# Avoid Python bytecode & buffer issues
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
@@ -16,20 +15,19 @@ RUN apt-get update && apt-get install -y \
     libsm6 \
     libxext6 \
     libxrender-dev \
+    libgl1 \                     # <--- ✅ This fixes libGL.so.1 error
+    git \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Git (optional but often useful)
-RUN apt-get update && apt-get install -y git
-
-# Install Python dependencies
+# Copy and install Python dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the project
+# Copy your code
 COPY . .
 
-# Expose Streamlit default port
+# Expose port for Streamlit
 EXPOSE 8501
 
-# Command to run the Streamlit app
+# Run your app
 CMD ["streamlit", "run", "frontend/display.py", "--server.port=8501", "--server.address=0.0.0.0"]

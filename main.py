@@ -14,7 +14,7 @@ from rag.rag_chain import get_rag_chain, get_rag_chain_with_sources
 print("Libraries Imported.....")
 
 # Load and extract
-file_path = "./data/attention_short.pdf"
+file_path = "./data/resume_dev.pdf"
 chunks = extract_pdf_elements(file_path)
 
 texts, tables, images = [], [], []
@@ -68,6 +68,6 @@ print("Entries have been pushed in vector store.....")
 
 # Run RAG
 chain = get_rag_chain(retriever)
-response = chain.invoke({"question": "Tell me the structure of transformer."})
+response = chain.invoke({"question": "Whaat are the points of ai email assistant?"})
 print(response)
 
