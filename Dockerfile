@@ -1,27 +1,25 @@
-# Start with a slim image
 FROM python:3.11-slim
 
-# Install system dependencies for unstructured, tesseract, OpenCV, etc.
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    libgl1-mesa-glx \
+    libgl1 \
     tesseract-ocr \
     poppler-utils \
-    libmagic1 \
-    build-essential \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    libmagic-dev \
+    && rm -rf /var/lib/apt/lists/*
 
-# Set the working directory
+# Set working directory
 WORKDIR /app
 
-# Copy the project files
+# Copy project files
 COPY . .
 
 # Install Python dependencies
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
-# Expose the port your app runs on (adjust if needed)
+# Streamlit specific (optional)
 EXPOSE 8501
 
-# Start the Streamlit app
+# Run the app
 CMD ["streamlit", "run", "frontend/display.py"]
