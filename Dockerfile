@@ -1,33 +1,27 @@
+# Start with a slim image
 FROM python:3.11-slim
 
-# Avoid Python bytecode & buffer issues
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-
-# Set working directory
-WORKDIR /app
-
-# Install system dependencies
+# Install system dependencies for unstructured, tesseract, OpenCV, etc.
 RUN apt-get update && apt-get install -y \
+    libgl1-mesa-glx \
     tesseract-ocr \
     poppler-utils \
-    libglib2.0-0 \
-    libsm6 \
-    libxext6 \
-    libxrender-dev \
-    libgl1 \                     # <--- ✅ This fixes libGL.so.1 error
-    git \
-    && rm -rf /var/lib/apt/lists/*
+    libmagic1 \
+    build-essential \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Copy and install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Set the working directory
+WORKDIR /app
 
-# Copy your code
+# Copy the project files
 COPY . .
 
-# Expose port for Streamlit
+# Install Python dependencies
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
+
+# Expose the port your app runs on (adjust if needed)
 EXPOSE 8501
 
-# Run your app
-CMD ["streamlit", "run", "frontend/display.py", "--server.port=8501", "--server.address=0.0.0.0"]
+# Start the Streamlit app
+CMD ["streamlit", "run", "frontend/display.py"]
