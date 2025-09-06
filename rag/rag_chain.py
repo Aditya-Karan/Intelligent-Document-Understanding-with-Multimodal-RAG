@@ -219,46 +219,4 @@ def get_rag_chain(retriever):
     )
 
 
-# --------------------------
-# ✅ Perplexity Chain With Image Saving
-# --------------------------
-def get_rag_chain_with_sources(retriever):
-    def process_and_save(response_with_context):
-        context = response_with_context.get("context", {})
-        images = context.get("images", [])
-        texts = context.get("texts", [])
-        response = response_with_context.get("response", "")
 
-        # ✅ Print Response
-        print("\n🧠 [RESPONSE]:\n", response)
-
-        # ✅ Print Text Context
-        print("\n📚 [TEXT CONTEXT]:")
-        for i, doc in enumerate(texts):
-            print(f"\n--- Text Document {i+1} ---")
-            try:
-                print(doc.page_content)
-            except:
-                print(doc)
-
-        # ✅ Save all images, regardless of whether 'image' is in response
-        if images:
-            print(f"\n🖼️ [IMAGE CONTEXT]: {len(images)} image(s) found.")
-            for idx, img in enumerate(images):
-                save_image_if_relevant(img, prefix=f"matched_image_{idx}")
-        else:
-            print("[INFO] ❌ No images found in context.")
-
-        return response_with_context
-
-
-    return (
-        {
-            "context": RunnableLambda(lambda x: parse_docs(retriever.vectorstore.similarity_search(x["question"]), retriever.docstore)),
-            "question": RunnablePassthrough()
-        }
-        | RunnablePassthrough().assign(
-            response=(RunnableLambda(build_prompt) | RunnableLambda(query_perplexity) | StrOutputParser())
-        )
-        | RunnableLambda(process_and_save)
-    )
